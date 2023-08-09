@@ -4,11 +4,8 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.GripperSubsystem;
@@ -20,7 +17,7 @@ public class RobotContainer
   private final CommandJoystick driverController = new CommandJoystick(OperatorConstants.kDriverControllerPort);
   private GripperSubsystem gripperSubsystem = new GripperSubsystem();
   private PivotSubsystem pivotSubsystem = new PivotSubsystem();
-  private RunCommand pivotControl;
+
   public RobotContainer()
   {
     configureBindings();
@@ -28,17 +25,23 @@ public class RobotContainer
 
   private void configureBindings() 
   {
+    // Controller 0 Button 4 opens gripper
     driverController.button(4).onTrue(Commands.runOnce(
     () -> { gripperSubsystem.setState(GripperState.OPEN); } ));
     
+    // Controller 0 Button 5 closes gripper
     driverController.button(5).onTrue(Commands.runOnce(
     () -> { gripperSubsystem.setState(GripperState.CLOSE); } ));
 
-    // Commands.run(() -> {pivotSubsystem.adjustSetpoint(driverController.getRawAxis(1));});
-    pivotControl = new RunCommand(
-      () -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1)); },
-    pivotSubsystem);
-    pivotSubsystem.setDefaultCommand(pivotControl);
+
+    // Manual control of pivot only when Controller 0 Axis 1 exceeds deadzone in positive or negative direction 
+    driverController.axisGreaterThan(1, OperatorConstants.kPivotDeadzone).whileTrue(
+      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1)); },
+      pivotSubsystem));
+
+    driverController.axisLessThan(1, -OperatorConstants.kPivotDeadzone).whileTrue(
+      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1)); },
+      pivotSubsystem));
 
   }
 

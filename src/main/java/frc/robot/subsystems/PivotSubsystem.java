@@ -11,8 +11,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Robot;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  
 
@@ -39,13 +37,11 @@ public class PivotSubsystem extends PIDSubsystem {
   public void useOutput(double output, double setpoint) 
   {
     pivot.set(output);
-    SmartDashboard.putNumber("Output", output);
   }
 
   @Override
   public double getMeasurement() 
   {
-    // Return the process variable measurement here
     return encoder.getPosition();
   }
 
@@ -62,6 +58,9 @@ public class PivotSubsystem extends PIDSubsystem {
     SmartDashboard.putNumber("Pivot Setpoint", getSetpoint());
   }
 
+  /**
+   * @param val Value from [-1f, 1f] to feed motor
+   */
   public void setMotor(double val) {
     pivot.set(val);
   }
