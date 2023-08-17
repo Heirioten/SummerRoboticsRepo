@@ -11,24 +11,23 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Robot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
- 
 
-public class PivotSubsystem extends PIDSubsystem {
 
-  CANSparkMax pivot;
+public class ExtensionArmSubsystem extends PIDSubsystem {
+  
+  CANSparkMax extension;
   RelativeEncoder encoder;
-
-  public PivotSubsystem() 
-  {
+  
+  /** Creates a new ExtensionArmSubsystem. */
+  public ExtensionArmSubsystem() {
     super(
         // The PIDController used by the subsystem
-        new PIDController(0.25, 0, 0.01));
+        new PIDController(0.5, 0, 0));
     
-    pivot = new CANSparkMax(5, MotorType.kBrushless);
-    encoder = pivot.getEncoder();
+    extension = new CANSparkMax(6, MotorType.kBrushless);
+    encoder = extension.getEncoder();
 
-    pivot.restoreFactoryDefaults();
+    extension.restoreFactoryDefaults();
 
     enable();
   }
@@ -36,7 +35,7 @@ public class PivotSubsystem extends PIDSubsystem {
   @Override
   public void useOutput(double output, double setpoint) 
   {
-    pivot.set(output);
+    //extension.set(output);
   }
 
   @Override
@@ -49,20 +48,17 @@ public class PivotSubsystem extends PIDSubsystem {
   public void periodic()
   {
     super.periodic();
-    SmartDashboard.putBoolean("disabled", Robot.isRobotDisabled());
     if(Robot.isRobotDisabled())
     {
       setSetpoint(encoder.getPosition());
     }
-    SmartDashboard.putNumber("Pivot Encoder", encoder.getPosition());
-    SmartDashboard.putNumber("Pivot Setpoint", getSetpoint());
   }
 
-  /**
+    /**
    * @param val Value from [-1f, 1f] to feed motor
    */
   public void setMotor(double val) {
-    pivot.set(val);
+    extension.set(val);
   }
 
   /**

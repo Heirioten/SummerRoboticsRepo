@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OperatorConstants;
 
 public class GripperSubsystem extends SubsystemBase {
   
@@ -25,6 +26,7 @@ public class GripperSubsystem extends SubsystemBase {
     gripper.setSoftLimit(SoftLimitDirection.kReverse, -2);
     gripper.enableSoftLimit(SoftLimitDirection.kForward, true);
     gripper.setSoftLimit(SoftLimitDirection.kForward, 17);
+    gripper.setSmartCurrentLimit(OperatorConstants.kNeo550CurrentLimit);
   }
 
   @Override
