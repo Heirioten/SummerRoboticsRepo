@@ -66,23 +66,26 @@ public class RobotContainer
 
     // Manual control of pivot only when Controller 0 Axis 1 exceeds deadzone in positive or negative direction 
     driverController.axisGreaterThan(1, OperatorConstants.kDeadzone).whileTrue(
-      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1)); },
+      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1) * 2); },
       pivotSubsystem));
 
     driverController.axisLessThan(1, -OperatorConstants.kDeadzone).whileTrue(
-      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1)); },
+      Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1) * 2); },
       pivotSubsystem));
 
-    // Manual control of extension only when Controller 0 Axis 0 exceeds deadzone in positive or negative direction 
-    // driverController.axisGreaterThan(0, OperatorConstants.kDeadzone).whileTrue(
-    //   Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(-driverController.getRawAxis(0)); },
-    //   extensionArmSubsystem));
+    // Manual control of extension only when Controller 0 Axis 0 exceeds deadzone in positive or negative direction (Non-PID loop)
+    driverController.axisGreaterThan(0, OperatorConstants.kDeadzone).whileTrue(
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 5); },
+      extensionArmSubsystem));
 
-    // driverController.axisLessThan(0, -OperatorConstants.kDeadzone).whileTrue(
-    //   Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(-driverController.getRawAxis(0)); },
-    //   extensionArmSubsystem));
+    driverController.axisLessThan(0, -OperatorConstants.kDeadzone).whileTrue(
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 5); },
+      extensionArmSubsystem));
     
     driveSubsystem.setDefaultCommand(teleopCommand);
+    // extensionArmSubsystem.setDefaultCommand(Commands.run(() -> {
+    //   extensionArmSubsystem.setMotor(0);
+    // }, extensionArmSubsystem));
   }
 
   public Command getAutonomousCommand() 

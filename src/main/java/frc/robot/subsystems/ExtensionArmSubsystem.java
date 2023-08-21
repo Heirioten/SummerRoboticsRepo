@@ -6,9 +6,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Robot;
 
@@ -22,12 +24,18 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
   public ExtensionArmSubsystem() {
     super(
         // The PIDController used by the subsystem
-        new PIDController(0.5, 0, 0));
+        new PIDController(0.2, 0, 0));
     
     extension = new CANSparkMax(6, MotorType.kBrushless);
     encoder = extension.getEncoder();
 
     extension.restoreFactoryDefaults();
+    extension.enableSoftLimit(SoftLimitDirection.kForward, true);
+    //extension.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    extension.setSoftLimit(SoftLimitDirection.kForward, 36);
+    //extension.setSoftLimit(SoftLimitDirection.kReverse, 5);
+    extension.setSmartCurrentLimit(50);
+
 
     enable();
   }
@@ -35,7 +43,7 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
   @Override
   public void useOutput(double output, double setpoint) 
   {
-    //extension.set(output);
+    extension.set(output);
   }
 
   @Override
@@ -52,6 +60,9 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
     {
       setSetpoint(encoder.getPosition());
     }
+
+    SmartDashboard.putNumber("Extension Motor Voltage", extension.get());
+    SmartDashboard.putNumber("Extension Encoder", encoder.getPosition());
   }
 
     /**
@@ -69,6 +80,12 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
   {
     double setpoint = getSetpoint();
     setpoint += (delta * 0.25);
+
+    if(delta < 0 && setpoint < -0.5)
+    {
+      setpoint = -0.5;
+    }
+    
     setSetpoint(setpoint);
     return setpoint;
   }

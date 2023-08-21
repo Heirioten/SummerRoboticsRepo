@@ -4,20 +4,25 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class TeleopCommand extends CommandBase {
  
   DriveSubsystem driveSubsystem;
   XboxController controller;
+  SlewRateLimiter filter;
   
   /** Creates a new TeleopCommand. */
   public TeleopCommand(DriveSubsystem driveSubsystem) 
   {
     this.driveSubsystem = driveSubsystem;
     controller = new XboxController(1);
+    addRequirements(driveSubsystem);
+    filter = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
   }
 
   // Called when the command is initially scheduled.
@@ -28,7 +33,8 @@ public class TeleopCommand extends CommandBase {
   @Override
   public void execute() 
   {
-    driveSubsystem.arcadeDrive(controller.getLeftY(), controller.getRightX());
+    // RightX of controller is divided by 2 to get half of the original voltage
+    driveSubsystem.arcadeDrive(filter.calculate(controller.getLeftY()), controller.getRightX() / 2.5);
   }
 
   // Called once the command ends or is interrupted.
