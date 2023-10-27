@@ -6,7 +6,9 @@ public final class Constants
   {
     public static final int kDriverControllerPort = 0;
     public static final double kDeadzone = 0.05;
+    public static final double kExtensionDeadzone = 0.25;
     public static final int kNeo550CurrentLimit = 20;
     public static final double kDriveRateLimit = 2.0;
+    public static final double kDriveSpeedDivisor = 1.5;
   }
 }

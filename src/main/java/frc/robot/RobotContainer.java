@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import javax.crypto.ExemptionMechanismException;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -16,6 +14,7 @@ import frc.robot.subsystems.ExtensionArmSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.GripperSubsystem.GripperState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
@@ -28,7 +27,9 @@ public class RobotContainer
   private PivotSubsystem pivotSubsystem = new PivotSubsystem();
   private ExtensionArmSubsystem extensionArmSubsystem = new ExtensionArmSubsystem();
   private DriveSubsystem driveSubsystem = new DriveSubsystem();
-  private TeleopCommand teleopCommand = new TeleopCommand(driveSubsystem);
+  private TeleopCommand teleopCommand = new TeleopCommand(driveSubsystem, this);
+
+  private SendableChooser driveChooser = new SendableChooser<Integer>();
 
   private RepeatCommand extensionCommand;
 
@@ -36,10 +37,15 @@ public class RobotContainer
   public RobotContainer()
   {
     configureBindings();
+
+    driveChooser.addOption("Tank", 1);
+    driveChooser.setDefaultOption("Arcade", 0);
   }
 
   private void configureBindings() 
   {
+
+    SmartDashboard.putData("Chooser", driveChooser);
     // Controller 0 Button 4 opens gripper
     driverController.button(4).onTrue(Commands.runOnce(
     () -> { gripperSubsystem.setState(GripperState.OPEN); } ));
@@ -73,13 +79,15 @@ public class RobotContainer
       Commands.run(() -> { pivotSubsystem.adjustSetpoint(-driverController.getRawAxis(1) * 2); },
       pivotSubsystem));
 
+
+
     // Manual control of extension only when Controller 0 Axis 0 exceeds deadzone in positive or negative direction (Non-PID loop)
-    driverController.axisGreaterThan(0, OperatorConstants.kDeadzone).whileTrue(
-      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 5); },
+    driverController.axisGreaterThan(0, OperatorConstants.kExtensionDeadzone).whileTrue(
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 3); },
       extensionArmSubsystem));
 
-    driverController.axisLessThan(0, -OperatorConstants.kDeadzone).whileTrue(
-      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 5); },
+    driverController.axisLessThan(0, -OperatorConstants.kExtensionDeadzone).whileTrue(
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * 1); },
       extensionArmSubsystem));
     
     driveSubsystem.setDefaultCommand(teleopCommand);
@@ -91,5 +99,9 @@ public class RobotContainer
   public Command getAutonomousCommand() 
   {
     return Commands.print("No autonomous command configured");
+  }
+
+  public int getDriveConfig() {
+    return (int) driveChooser.getSelected();
   }
 }

@@ -51,4 +51,9 @@ public class DriveSubsystem extends SubsystemBase {
   {
     drive.arcadeDrive(y, omega);
   }
+
+  public void tankDrive(double ly, double ry) {
+    left.set(ly);
+    right.set(ry);
+  }
 }
