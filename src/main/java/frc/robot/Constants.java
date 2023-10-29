@@ -4,6 +4,8 @@ public final class Constants
 {
   public static class OperatorConstants 
   {
+
+    public static final double kDistancePerPulse = 0.0053218923153;
     public static final int kDriverControllerPort = 0;
     public static final double kDeadzone = 0.05;
     public static final double kExtensionDeadzone = 0.25;
