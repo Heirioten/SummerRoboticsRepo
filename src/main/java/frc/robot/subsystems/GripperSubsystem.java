@@ -23,9 +23,9 @@ public class GripperSubsystem extends SubsystemBase {
     encoder = gripper.getEncoder();    
     gripper.restoreFactoryDefaults();
     gripper.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    gripper.setSoftLimit(SoftLimitDirection.kReverse, -2);
+    gripper.setSoftLimit(SoftLimitDirection.kReverse, OperatorConstants.kGripperReverseLimit);
     gripper.enableSoftLimit(SoftLimitDirection.kForward, true);
-    gripper.setSoftLimit(SoftLimitDirection.kForward, 17);
+    gripper.setSoftLimit(SoftLimitDirection.kForward, OperatorConstants.kGripperForwardLimit);
     gripper.setSmartCurrentLimit(OperatorConstants.kNeo550CurrentLimit);
   }
 

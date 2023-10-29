@@ -56,6 +56,7 @@ public class PivotSubsystem extends PIDSubsystem {
     }
     SmartDashboard.putNumber("Pivot Encoder", encoder.getPosition());
     SmartDashboard.putNumber("Pivot Setpoint", getSetpoint());
+    SmartDashboard.putNumber("Pivot Value", pivot.get());
   }
 
   /**

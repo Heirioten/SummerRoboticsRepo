@@ -9,15 +9,12 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 
 
 public class ExtensionArmSubsystem extends PIDSubsystem {
@@ -69,13 +66,9 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
       setSetpoint(encoder.getPosition());
     }
 
-
-    SmartDashboard.putNumber("Extension Setpoint", getSetpoint());
-    SmartDashboard.putNumber("Extension Motor Voltage", extension.get());
     SmartDashboard.putNumber("Extension Encoder", encoder.getPosition());
-
-    SmartDashboard.putNumber("Spool Encoder Position", encoder.getPosition());
-    SmartDashboard.putNumber("Spool Absolute Encoder Position", absEncoder.getPosition());
+    SmartDashboard.putNumber("Extension Setpoint", getSetpoint());
+    SmartDashboard.putNumber("Extension Value", extension.get());
   }
 
     /**
