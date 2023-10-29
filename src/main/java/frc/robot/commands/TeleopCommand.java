@@ -38,7 +38,7 @@ public class TeleopCommand extends CommandBase {
   {
     // RightX of controller is divided by 2 to get half of the original voltage
     if(container.getDriveConfig() == 0)
-      driveSubsystem.arcadeDrive(filter.calculate(controller.getLeftY() / OperatorConstants.kDriveSpeedDivisor), controller.getRightX() / 2.5);
+      driveSubsystem.arcadeDrive(filter.calculate(controller.getLeftY() / OperatorConstants.kDriveSpeedDivisor), (controller.getRightX() / OperatorConstants.kDriveTurnDivisor));
     if(container.getDriveConfig() == 1) {
       driveSubsystem.tankDrive(controller.getLeftY(), controller.getRightY());
     }

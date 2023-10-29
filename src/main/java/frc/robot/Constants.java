@@ -10,6 +10,7 @@ public final class Constants
     public static final int kNeo550CurrentLimit = 20;
     public static final double kDriveRateLimit = 2.0;
     public static final double kDriveSpeedDivisor = 1.5;
+    public static final double kDriveTurnDivisor = 2.5;
 
     public static final float kGripperForwardLimit = 17.0f;
     public static final float kGripperReverseLimit = -2f;
