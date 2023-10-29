@@ -44,11 +44,11 @@ public class GripperSubsystem extends SubsystemBase {
   {
     if(state == GripperState.OPEN)
     {
-      gripper.set(-0.5);
+      gripper.set(-OperatorConstants.kGripperSpeed);
     }
     else
     {
-      gripper.set(0.5);
+      gripper.set(OperatorConstants.kGripperSpeed);
     }
   }
 
