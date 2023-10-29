@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.TeleopCommand;
@@ -14,8 +15,17 @@ import frc.robot.subsystems.ExtensionArmSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.GripperSubsystem.GripperState;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+
 
 public class RobotContainer
 {
@@ -28,6 +38,9 @@ public class RobotContainer
 
   private SendableChooser<Integer> driveChooser = new SendableChooser<Integer>();
 
+  private TrajectoryConfig trajectoryConfig;
+  private DifferentialDriveVoltageConstraint constraint;
+
 
   public RobotContainer()
   {
@@ -35,12 +48,20 @@ public class RobotContainer
 
     driveChooser.addOption("Tank", 1);
     driveChooser.setDefaultOption("Arcade", 0);
+
+    constraint = new DifferentialDriveVoltageConstraint(
+      new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),
+      OperatorConstants.kinematics,
+      6);
+    trajectoryConfig = new TrajectoryConfig(OperatorConstants.kMaxAutoVel, OperatorConstants.kMaxAutoAccel)
+    .setKinematics(OperatorConstants.kinematics).addConstraint(constraint);
   }
 
   private void configureBindings() 
   {
 
     SmartDashboard.putData("DriveChooser", driveChooser);
+
     // Controller 0 Button 4 opens gripper
     driverController.button(4).onTrue(Commands.runOnce(
     () -> { gripperSubsystem.setState(GripperState.OPEN); } ));
@@ -60,11 +81,13 @@ public class RobotContainer
 
     // Manual control of extension only when Controller 0 Axis 0 exceeds deadzone in positive or negative direction (Non-PID loop)
     driverController.axisGreaterThan(0, OperatorConstants.kExtensionDeadzone).whileTrue(
-      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * OperatorConstants.kExtensionSpeed_OUT); },
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(
+        driverController.getRawAxis(0) * OperatorConstants.kExtensionSpeed_OUT); },
       extensionArmSubsystem));
 
     driverController.axisLessThan(0, -OperatorConstants.kExtensionDeadzone).whileTrue(
-      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(driverController.getRawAxis(0) * OperatorConstants.kExtensionSpeed_IN); },
+      Commands.run(() -> { extensionArmSubsystem.adjustSetpoint(
+        driverController.getRawAxis(0) * OperatorConstants.kExtensionSpeed_IN); },
       extensionArmSubsystem));
     
     driveSubsystem.setDefaultCommand(teleopCommand);
@@ -73,6 +96,21 @@ public class RobotContainer
   public Command getAutonomousCommand() 
   {
     return Commands.print("No autonomous command configured");
+  }
+
+  public Command getRamseteCommand(Trajectory trajectory) {
+    return new RamseteCommand(
+      trajectory,
+      driveSubsystem::getPose,
+      new RamseteController(OperatorConstants.kB, OperatorConstants.kZeta),
+      new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),
+      OperatorConstants.kinematics,
+      driveSubsystem::getWheelSpeeds,
+      new PIDController(OperatorConstants.kP, 0, 0),
+      new PIDController(OperatorConstants.kP, 0, 0),
+      driveSubsystem::tankDriveVolts,
+      driveSubsystem
+    );
   }
 
   public int getDriveConfig() {

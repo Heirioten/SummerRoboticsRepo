@@ -6,14 +6,15 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,7 +30,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   PigeonIMU pigeon;
 
-  DifferentialDriveKinematics kinematics;
   DifferentialDriveOdometry odometry;
   
   /** Creates a new DriveSubsystem. */
@@ -52,6 +52,11 @@ public class DriveSubsystem extends SubsystemBase {
     bl.restoreFactoryDefaults();
     br.restoreFactoryDefaults();
 
+    REVPhysicsSim.getInstance().addSparkMax(fl, DCMotor.getNEO(1));
+    REVPhysicsSim.getInstance().addSparkMax(fr, DCMotor.getNEO(1));
+    REVPhysicsSim.getInstance().addSparkMax(bl, DCMotor.getNEO(1));
+    REVPhysicsSim.getInstance().addSparkMax(br, DCMotor.getNEO(1));
+
     left = new MotorControllerGroup(fl, bl);
     right = new MotorControllerGroup(fr, br);
     left.setInverted(true);
@@ -60,13 +65,17 @@ public class DriveSubsystem extends SubsystemBase {
 
     pigeon = new PigeonIMU(0);
 
-    kinematics = new DifferentialDriveKinematics(1);
     odometry = new DifferentialDriveOdometry(new Rotation2d(0), 0, 0);
   }
 
   @Override
   public void periodic() {
     odometry.update(new Rotation2d(getYaw()), leftEncoderAverage(), rightEncoderAverage());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    REVPhysicsSim.getInstance().run();
   }
 
   public void resetEncoders() {

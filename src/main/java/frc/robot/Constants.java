@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+
 public final class Constants 
 {
   public static class OperatorConstants 
@@ -21,5 +23,20 @@ public final class Constants
     public static final double kExtensionSpeed_IN = 1;
     public static final double kExtensionSpeed_OUT = 3;
     public static final double kGripperSpeed = 0.5;
+
+    public static final double kS = 0.22;
+    public static final double kV = 1.98;
+    public static final double kA = 0.2;
+
+    public static final double kP = 5.0;
+
+    public static final double kTrackWidth = 1;
+    public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(kTrackWidth);
+
+    public static final double kB = 2.0;
+    public static final double kZeta = 0.7;
+
+    public static final double kMaxAutoVel = 2.0;
+    public static final double kMaxAutoAccel = 1.0;
   }
 }
