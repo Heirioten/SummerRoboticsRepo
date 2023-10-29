@@ -12,18 +12,20 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class TeleopCommand extends CommandBase {
+
+  // this is our loop that actually controls the drivetrain of the robot
  
   DriveSubsystem driveSubsystem;
   XboxController controller;
-  SlewRateLimiter filter;
-  RobotContainer container;
+  SlewRateLimiter filter; // slows our (de/ac)celeration so that we dont tip over from a sudden jerk
+  RobotContainer container; // we want this reference so that we can access the drive config (remember spinaris wanted to switch between arcade and tank drive on the fly if desired)
   
   public TeleopCommand(DriveSubsystem driveSubsystem, RobotContainer container) 
   {
     this.driveSubsystem = driveSubsystem;
     this.container = container;
     controller = new XboxController(1);
-    addRequirements(driveSubsystem);
+    addRequirements(driveSubsystem); // commands should tell the CommandScheduler the subsystems they require, so that the scheduler will know which commands can and cannot run concurrently
     filter = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
   }
 
@@ -47,11 +49,15 @@ public class TeleopCommand extends CommandBase {
   @Override
   public void end(boolean interrupted) 
   {
+    // if we dont zero everything on command end, if we call another command using the DriveSubsystem that doenst itself zero everything immedaitely, we'll keep going with whatever the driver was doing at the time
+    // (there are actually no other commands using the DriveSubsystem at the moment, but build code that is adatpable or something)
     driveSubsystem.arcadeDrive(0, 0);
   }
 
   @Override
   public boolean isFinished() {
-    return false;
+    return false; // so relatable
   }
 }
+
+// now read DriveSubsystem. this one sucks a bit (a lot)

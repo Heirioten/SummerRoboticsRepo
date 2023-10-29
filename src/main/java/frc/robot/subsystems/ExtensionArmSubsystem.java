@@ -18,7 +18,9 @@ import frc.robot.Robot;
 
 
 public class ExtensionArmSubsystem extends PIDSubsystem {
-  
+  /* we need PID control on the extension motor because gravity will otherwise pull the arm either in or out depending on our angle. if it's getting pulled in, that makes scoring annoying. if its getting pulled out, the arm is probably gonna droop onto the floor
+  and we dont wanna drag it around */
+
   CANSparkMax extension;
   RelativeEncoder encoder;
   AbsoluteEncoder absEncoder;
@@ -31,9 +33,11 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
     
     extension = new CANSparkMax(6, MotorType.kBrushless);
     encoder = extension.getEncoder();
-    absEncoder = extension.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+    absEncoder = extension.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle); // absolute encoder (DOESNT ACTUALLY WORK LOL!)
 
     extension.restoreFactoryDefaults();
+
+    // without these constraints, the spool will overspool and fixing that SUCKS!
     extension.enableSoftLimit(SoftLimitDirection.kForward, true);
     extension.enableSoftLimit(SoftLimitDirection.kReverse, true);
     extension.setSoftLimit(SoftLimitDirection.kForward, 34);
@@ -41,7 +45,7 @@ public class ExtensionArmSubsystem extends PIDSubsystem {
     extension.setSmartCurrentLimit(50);
     
 
-
+    // most of this is the same as PivotSubsystem, if not identical
     enable();
   }
 
