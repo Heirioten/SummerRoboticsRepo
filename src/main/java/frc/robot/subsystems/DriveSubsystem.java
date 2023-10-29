@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -87,22 +86,24 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
-    field.setRobotPose(odometry.getPoseMeters());
+    Pose2d odometryPose = odometry.getPoseMeters();
+    field.setRobotPose(odometryPose);
     SmartDashboard.putData(field);
+    SmartDashboard.putNumber("Field X", odometryPose.getX());
+    SmartDashboard.putNumber("Field Y", odometryPose.getY());
   }
 
   @Override
   public void simulationPeriodic() {
 
     drivetrainSim.setInputs(left.get() * RobotController.getInputVoltage(), right.get() * RobotController.getInputVoltage());
-
     drivetrainSim.update(0.02);
     encoderFl.setPosition(drivetrainSim.getLeftPositionMeters());
     encoderFr.setPosition(drivetrainSim.getRightPositionMeters());
     encoderBl.setPosition(drivetrainSim.getLeftPositionMeters());
     encoderBr.setPosition(drivetrainSim.getRightPositionMeters());
 
-    pigeon.setYaw(-drivetrainSim.getHeading().getDegrees());
+    pigeon.setYaw(drivetrainSim.getHeading().getDegrees());
     SmartDashboard.putNumber("Sim Gyro", pigeon.getYaw());
     
   }
@@ -159,10 +160,14 @@ public class DriveSubsystem extends SubsystemBase {
   public void tankDrive(double ly, double ry) {
     left.set(ly);
     right.set(ry);
+    drive.feed();
   }
 
   public void tankDriveVolts(double leftV, double rightV) {
-    left.setVoltage(leftV);
-    right.setVoltage(rightV);
+    // left.setVoltage(leftV);
+    // right.setVoltage(rightV);
+    left.set(leftV / RobotController.getBatteryVoltage());
+    right.set(rightV / RobotController.getBatteryVoltage());
+    drive.feed();
   }
 }

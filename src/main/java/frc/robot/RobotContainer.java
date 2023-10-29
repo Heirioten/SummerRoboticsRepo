@@ -16,11 +16,17 @@ import frc.robot.subsystems.GripperSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.GripperSubsystem.GripperState;
 
+import java.util.List;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,6 +43,7 @@ public class RobotContainer
   private TeleopCommand teleopCommand = new TeleopCommand(driveSubsystem, this);
 
   private SendableChooser<Integer> driveChooser = new SendableChooser<Integer>();
+  private SendableChooser<Integer> tempAutoChooser = new SendableChooser<Integer>();
 
   private TrajectoryConfig trajectoryConfig;
   private DifferentialDriveVoltageConstraint constraint;
@@ -50,6 +57,9 @@ public class RobotContainer
     driveChooser.setDefaultOption("Arcade", 0);
     driveChooser.addOption("SimF310", 2);
 
+    tempAutoChooser.setDefaultOption("Nothing", 0);
+    tempAutoChooser.setDefaultOption("Test Trajectory Auto", 1);
+
     constraint = new DifferentialDriveVoltageConstraint(
       new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),
       OperatorConstants.kinematics,
@@ -62,6 +72,7 @@ public class RobotContainer
   {
 
     SmartDashboard.putData("DriveChooser", driveChooser);
+    SmartDashboard.putData("TempAutoChooser", tempAutoChooser);
 
     // Controller 0 Button 4 opens gripper
     driverController.button(4).onTrue(Commands.runOnce(
@@ -96,7 +107,16 @@ public class RobotContainer
 
   public Command getAutonomousCommand() 
   {
-    return Commands.print("No autonomous command configured");
+    if(tempAutoChooser.getSelected() == 0) return Commands.print("No autonomous command configured");
+    else {
+      return getRamseteCommand(
+        TrajectoryGenerator.generateTrajectory(new Pose2d(), List.of(
+          new Translation2d(2, 1),
+          new Translation2d(4, 5)
+        ),
+        new Pose2d(10, 2, Rotation2d.fromDegrees(0)), trajectoryConfig)
+      );
+    }
   }
 
   public Command getRamseteCommand(Trajectory trajectory) {
