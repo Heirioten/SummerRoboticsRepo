@@ -24,6 +24,12 @@ public final class Constants
     public static final double kExtensionSpeed_OUT = 3;
     public static final double kGripperSpeed = 0.5;
 
+
+    // ALL OF THESE need to be measured
+    public static final double kDriveGearing = 10.71;
+    public static final double kMOI = 7.5;
+    public static final double kMass = 60.0;
+
     public static final double kS = 0.22;
     public static final double kV = 1.98;
     public static final double kA = 0.2;

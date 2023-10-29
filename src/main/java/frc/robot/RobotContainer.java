@@ -48,6 +48,7 @@ public class RobotContainer
 
     driveChooser.addOption("Tank", 1);
     driveChooser.setDefaultOption("Arcade", 0);
+    driveChooser.addOption("SimF310", 2);
 
     constraint = new DifferentialDriveVoltageConstraint(
       new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),

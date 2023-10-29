@@ -10,13 +10,19 @@ import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OperatorConstants;
 
@@ -28,9 +34,13 @@ public class DriveSubsystem extends SubsystemBase {
   MotorControllerGroup left, right;
   DifferentialDrive drive;
 
+  Field2d field;
+
   PigeonIMU pigeon;
 
   DifferentialDriveOdometry odometry;
+
+  DifferentialDrivetrainSim drivetrainSim;
   
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() 
@@ -52,11 +62,6 @@ public class DriveSubsystem extends SubsystemBase {
     bl.restoreFactoryDefaults();
     br.restoreFactoryDefaults();
 
-    REVPhysicsSim.getInstance().addSparkMax(fl, DCMotor.getNEO(1));
-    REVPhysicsSim.getInstance().addSparkMax(fr, DCMotor.getNEO(1));
-    REVPhysicsSim.getInstance().addSparkMax(bl, DCMotor.getNEO(1));
-    REVPhysicsSim.getInstance().addSparkMax(br, DCMotor.getNEO(1));
-
     left = new MotorControllerGroup(fl, bl);
     right = new MotorControllerGroup(fr, br);
     left.setInverted(true);
@@ -66,16 +71,40 @@ public class DriveSubsystem extends SubsystemBase {
     pigeon = new PigeonIMU(0);
 
     odometry = new DifferentialDriveOdometry(new Rotation2d(0), 0, 0);
+
+    field = new Field2d();
+
+    drivetrainSim = new DifferentialDrivetrainSim(DCMotor.getNEO(4),
+      OperatorConstants.kDriveGearing,
+      OperatorConstants.kMOI,
+      OperatorConstants.kMass,
+      Units.inchesToMeters(3),
+      OperatorConstants.kTrackWidth,
+      VecBuilder.fill(0.001, 0.01, 0.001, 0.1, 0.1, 0.005, 0.005)
+    );
   }
 
   @Override
   public void periodic() {
-    odometry.update(new Rotation2d(getYaw()), leftEncoderAverage(), rightEncoderAverage());
+    odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
+    field.setRobotPose(odometry.getPoseMeters());
+    SmartDashboard.putData(field);
   }
 
   @Override
   public void simulationPeriodic() {
-    REVPhysicsSim.getInstance().run();
+
+    drivetrainSim.setInputs(left.get() * RobotController.getInputVoltage(), right.get() * RobotController.getInputVoltage());
+
+    drivetrainSim.update(0.02);
+    encoderFl.setPosition(drivetrainSim.getLeftPositionMeters());
+    encoderFr.setPosition(drivetrainSim.getRightPositionMeters());
+    encoderBl.setPosition(drivetrainSim.getLeftPositionMeters());
+    encoderBr.setPosition(drivetrainSim.getRightPositionMeters());
+
+    pigeon.setYaw(-drivetrainSim.getHeading().getDegrees());
+    SmartDashboard.putNumber("Sim Gyro", pigeon.getYaw());
+    
   }
 
   public void resetEncoders() {
