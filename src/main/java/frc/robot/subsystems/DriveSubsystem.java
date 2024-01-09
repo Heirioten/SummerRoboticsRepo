@@ -4,123 +4,67 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.PigeonIMU;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.OperatorConstants;
 
 
 public class DriveSubsystem extends SubsystemBase {
   
-  CANSparkMax fl, fr, bl, br;
-  RelativeEncoder encoderFl, encoderFr, encoderBl, encoderBr;
-  MotorControllerGroup left, right;
-  DifferentialDrive drive;
+  private final DriveSubsystemIO io;
+  DriveSubsystemIOInputsAutoLogged inputs = new DriveSubsystemIOInputsAutoLogged();
 
   Field2d field;
-
-  PigeonIMU pigeon;
-
   DifferentialDriveOdometry odometry;
 
-  DifferentialDrivetrainSim drivetrainSim;
-  
-  /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() 
+  public DriveSubsystem(DriveSubsystemIO io) 
   {
-    fl = new CANSparkMax(1, MotorType.kBrushless);
-    fr = new CANSparkMax(2, MotorType.kBrushless);
-    bl = new CANSparkMax(3, MotorType.kBrushless);
-    br = new CANSparkMax(4, MotorType.kBrushless);
-    encoderFl = fl.getEncoder();
-    encoderFr = fr.getEncoder();
-    encoderBl = bl.getEncoder();
-    encoderBr = br.getEncoder();
-    encoderFl.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-    encoderFr.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-    encoderBl.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-    encoderBr.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-    fl.restoreFactoryDefaults();
-    fr.restoreFactoryDefaults();
-    bl.restoreFactoryDefaults();
-    br.restoreFactoryDefaults();
-
-    left = new MotorControllerGroup(fl, bl);
-    right = new MotorControllerGroup(fr, br);
-    left.setInverted(true);
-
-    drive = new DifferentialDrive(left, right);
-
-    pigeon = new PigeonIMU(0);
-
+    this.io = io;
     odometry = new DifferentialDriveOdometry(new Rotation2d(0), 0, 0);
 
     field = new Field2d();
-
-    drivetrainSim = new DifferentialDrivetrainSim(DCMotor.getNEO(4),
-      OperatorConstants.kDriveGearing,
-      OperatorConstants.kMOI,
-      OperatorConstants.kMass,
-      Units.inchesToMeters(3),
-      OperatorConstants.kTrackWidth,
-      VecBuilder.fill(0.001, 0.01, 0.001, 0.1, 0.1, 0.005, 0.005)
-    );
   }
 
   @Override
   public void periodic() {
-    odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
-    Pose2d odometryPose = odometry.getPoseMeters();
-    field.setRobotPose(odometryPose);
-    SmartDashboard.putData(field);
-    SmartDashboard.putNumber("Field X", odometryPose.getX());
-    SmartDashboard.putNumber("Field Y", odometryPose.getY());
-  }
+    io.updateInputs(inputs);
+    Logger.getInstance().processInputs("DriveSubsystem", inputs);
 
-  @Override
-  public void simulationPeriodic() {
-
-    drivetrainSim.setInputs(left.get() * RobotController.getInputVoltage(), right.get() * RobotController.getInputVoltage());
-    drivetrainSim.update(0.02);
-    encoderFl.setPosition(drivetrainSim.getLeftPositionMeters());
-    encoderFr.setPosition(drivetrainSim.getRightPositionMeters());
-    encoderBl.setPosition(drivetrainSim.getLeftPositionMeters());
-    encoderBr.setPosition(drivetrainSim.getRightPositionMeters());
-
-    pigeon.setYaw(drivetrainSim.getHeading().getDegrees());
-    SmartDashboard.putNumber("Sim Gyro", pigeon.getYaw());
+    Logger.getInstance().recordOutput("Odometry/Pose", getPose());
     
+    odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
   }
 
-  public void resetEncoders() {
-    encoderFl.setPosition(0);
-    encoderFr.setPosition(0);
-    encoderBl.setPosition(0);
-    encoderBr.setPosition(0);
+  // Drive methods
+  public void arcadeDrive(double y, double omega)
+  {
+    var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
+    tankDrive(speeds.left, speeds.right);
   }
 
-  public void resetGyro() {
-    pigeon.setYaw(0);
+  public void tankDrive(double left, double right) {
+    tankDriveVolts(left * RobotController.getBatteryVoltage(), right * RobotController.getBatteryVoltage());
   }
 
-  public void resetOdometry() {
-    odometry.resetPosition(new Rotation2d(0), leftEncoderAverage(), rightEncoderAverage(), getPose());
+  public void tankDriveVolts(double leftV, double rightV) {
+    io.setLeftVoltage(leftV);
+    io.setRightVoltage(rightV);
+  }
+
+
+
+
+  // Getters / Setters
+
+  public void setPose(double x, double y, double yaw) {
+    odometry.resetPosition(new Rotation2d(yaw), leftEncoderAverage(), rightEncoderAverage(), new Pose2d(x, y, new Rotation2d(yaw)));
   }
 
   public Pose2d getPose() {
@@ -128,46 +72,25 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    return new DifferentialDriveWheelSpeeds(
-      ((encoderFl.getVelocity() + encoderBl.getVelocity()) / 2),
-      ((encoderFr.getVelocity() + encoderBr.getVelocity()) / 2)
-    );
+    var speeds = new DifferentialDriveWheelSpeeds(inputs.leftVelocity, inputs.rightVelocity);
+
+    return speeds;
   }
 
   public double getYaw() {
-    return pigeon.getYaw();
+    return inputs.gyroYaw;
   }
 
   public double leftEncoderAverage() {
-    return (encoderFl.getPosition() + encoderBl.getPosition()) / 2;
+    return inputs.leftEncoderAverage;
   }
 
   public double rightEncoderAverage() {
-    return (encoderFr.getPosition() + encoderBr.getPosition()) / 2;
+    return inputs.rightEncoderAverage;
   }
 
   // not sure why we need this one but trajectory tutorial says we do and i havent read it all yet
   public double getEncoderAverage() {
-    return (leftEncoderAverage() + rightEncoderAverage()) / 4;
-  }
-
-  // drive methods
-  public void arcadeDrive(double y, double omega)
-  {
-    drive.arcadeDrive(y, omega);
-  }
-
-  public void tankDrive(double ly, double ry) {
-    left.set(ly);
-    right.set(ry);
-    drive.feed();
-  }
-
-  public void tankDriveVolts(double leftV, double rightV) {
-    // left.setVoltage(leftV);
-    // right.setVoltage(rightV);
-    left.set(leftV / RobotController.getBatteryVoltage());
-    right.set(rightV / RobotController.getBatteryVoltage());
-    drive.feed();
+    return (leftEncoderAverage() + rightEncoderAverage()) / 2;
   }
 }

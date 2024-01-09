@@ -7,7 +7,8 @@ public final class Constants
   public static class OperatorConstants 
   {
 
-    public static final double kDistancePerPulse = 0.0053218923153;
+    public static final double kDistancePerPulse = (.1524 * Math.PI) / 10.71;
+    public static final double kVelocityConversionFactor = 0.0865911847/60.0;
     public static final int kDriverControllerPort = 0;
     public static final double kDeadzone = 0.05;
     public static final double kExtensionDeadzone = 0.25;
@@ -30,11 +31,11 @@ public final class Constants
     public static final double kMOI = 7.5;
     public static final double kMass = 60.0;
 
-    public static final double kS = 0.22;
-    public static final double kV = 1.98;
-    public static final double kA = 0.2;
+    public static final double kS = 0.120;
+    public static final double kV = 1.36;
+    public static final double kA = 0.236;
 
-    public static final double kP = 5.0;
+    public static final double kP = 0.146;
 
     public static final double kTrackWidth = 1;
     public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(kTrackWidth);
@@ -43,6 +44,6 @@ public final class Constants
     public static final double kZeta = 0.7;
 
     public static final double kMaxAutoVel = 2.0;
-    public static final double kMaxAutoAccel = 1.0;
+    public static final double kMaxAutoAccel = 0.25;
   }
 }

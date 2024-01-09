@@ -4,20 +4,33 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot 
+public class Robot extends LoggedRobot 
 {
   private Command autonomousCommand;
 
   private RobotContainer robotContainer;
-  public static boolean robotDisabled;
 
   @Override
   public void robotInit() 
   {
+    if(Robot.isReal()) {
+      Logger.getInstance().addDataReceiver(new WPILOGWriter("/media/sda2"));
+      Logger.getInstance().addDataReceiver(new NT4Publisher());
+    } else {
+      Logger.getInstance().addDataReceiver(new NT4Publisher());
+    }
+
+    Logger.getInstance().start();
+
+
     robotContainer = new RobotContainer();
   }
 
@@ -28,10 +41,7 @@ public class Robot extends TimedRobot
   }
 
   @Override
-  public void disabledInit() 
-  {
-    robotDisabled = true;
-  }
+  public void disabledInit() {}
 
   @Override
   public void disabledPeriodic() {}
@@ -61,8 +71,6 @@ public class Robot extends TimedRobot
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-
-    robotDisabled = false;
   }
 
   @Override
@@ -82,9 +90,4 @@ public class Robot extends TimedRobot
 
   @Override
   public void testExit() {}
-
-  public static boolean isRobotDisabled()
-  {
-    return robotDisabled;
-  }
 }

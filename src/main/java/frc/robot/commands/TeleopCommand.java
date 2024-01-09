@@ -22,7 +22,7 @@ public class TeleopCommand extends CommandBase {
   {
     this.driveSubsystem = driveSubsystem;
     this.container = container;
-    controller = new XboxController(1);
+    controller = new XboxController(0);
     addRequirements(driveSubsystem);
     filter = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
   }
@@ -33,14 +33,14 @@ public class TeleopCommand extends CommandBase {
   @Override
   public void execute() 
   {
-    if(container.getDriveConfig() == 0)
-      driveSubsystem.arcadeDrive(filter.calculate(controller.getLeftY() / OperatorConstants.kDriveSpeedDivisor), (controller.getRightX() / OperatorConstants.kDriveTurnDivisor));
-    else if(container.getDriveConfig() == 1) {
-      driveSubsystem.tankDrive(controller.getLeftY(), controller.getRightY());
-    } else {
-      driveSubsystem.arcadeDrive(filter.calculate(-controller.getRawAxis(1)), 
-      controller.getRawAxis(2));
-    }
+    // if(container.getDriveConfig() == 0)
+      driveSubsystem.arcadeDrive(filter.calculate(-controller.getLeftY() / OperatorConstants.kDriveSpeedDivisor), (-controller.getRightX() / OperatorConstants.kDriveTurnDivisor));
+    // else if(container.getDriveConfig() == 1) {
+    //   driveSubsystem.tankDrive(controller.getLeftY(), controller.getRightY());
+    // } else {
+    //   driveSubsystem.arcadeDrive(filter.calculate(-controller.getRawAxis(1)), 
+    //   controller.getRawAxis(2));
+    // }
 
    }
 
