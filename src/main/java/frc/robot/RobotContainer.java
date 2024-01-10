@@ -7,11 +7,19 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.FollowTrajectoryCommand;
+import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.TeleopCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.DriveSubsystemIOSparkMax;
 
+import java.util.HashMap;
 import java.util.List;
+
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
@@ -24,7 +32,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotContainer
 {
@@ -42,6 +49,9 @@ public class RobotContainer
   public RobotContainer()
   {
     driveSubsystem = new DriveSubsystem(new DriveSubsystemIOSparkMax());
+
+        driveSubsystem.setPose(1.92, 4.46, 180);
+
     teleopCommand = new TeleopCommand(driveSubsystem, this);
 
     driveChooser.setDefaultOption("Arcade", 0);
@@ -55,6 +65,7 @@ public class RobotContainer
       6);
     trajectoryConfig = new TrajectoryConfig(0.5, 0.2)
     .setKinematics(OperatorConstants.kinematics).addConstraint(constraint);
+    
 
     configureBindings();
   }
@@ -67,30 +78,28 @@ public class RobotContainer
 
   public Command getAutonomousCommand() 
   {
-      driveSubsystem.setPose(0, 0, 0);
-      return getRamseteCommand(
-        TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, Rotation2d.fromDegrees(0)), List.of(
-          new Translation2d(2.1, -0.25),
-          new Translation2d(2.3, -2),
-          new Translation2d(2.3, -4.5),
-          new Translation2d(7.2, -4.5)
-        ),
-        new Pose2d(7.2, 0.5 , Rotation2d.fromDegrees(0)), trajectoryConfig)
-      );
+    return getSwerveAutoCommand(
+      PathPlanner.loadPath("Blue1_2Cube_0", OperatorConstants.kMaxAutoVel, OperatorConstants.kMaxAutoAccel),
+      getSwerveAutoBuilder());
 
   }
 
   public Command getRamseteCommand(Trajectory trajectory) {
-    return new RamseteCommand(
-      trajectory,
+    return new FollowTrajectoryCommand(driveSubsystem, trajectory);
+  }
+
+  public Command getSwerveAutoCommand(PathPlannerTrajectory trajectory, SwerveAutoBuilder swerveAutoBuilder) {
+    return new SwerveTrajectoryCommand(driveSubsystem, trajectory, swerveAutoBuilder);
+  }
+
+  public SwerveAutoBuilder getSwerveAutoBuilder() {
+    return new SwerveAutoBuilder(
       driveSubsystem::getPose,
-      new RamseteController(OperatorConstants.kB, OperatorConstants.kZeta),
-      new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),
-      OperatorConstants.kinematics,
-      driveSubsystem::getWheelSpeeds,
-      new PIDController(OperatorConstants.kP, 0, 0),
-      new PIDController(OperatorConstants.kP, 0, 0),
-      driveSubsystem::tankDriveVolts,
+      driveSubsystem::setPose,
+      new PIDConstants(OperatorConstants.kP, 0, 0),
+      new PIDConstants(OperatorConstants.kP, 0, 0),
+      driveSubsystem::driveChassisSpeeds,
+      new HashMap<>(),
       driveSubsystem
     );
   }

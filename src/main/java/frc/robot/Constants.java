@@ -6,40 +6,39 @@ public final class Constants
 {
   public static class OperatorConstants 
   {
-
+    // Encoder Conversions
     public static final double kDistancePerPulse = (.1524 * Math.PI) / 10.71;
     public static final double kVelocityConversionFactor = 0.0865911847/60.0;
+
+    // User controller settings
     public static final int kDriverControllerPort = 0;
     public static final double kDeadzone = 0.05;
-    public static final double kExtensionDeadzone = 0.25;
-    public static final int kNeo550CurrentLimit = 20;
+    
     public static final double kDriveRateLimit = 2.0;
     public static final double kDriveSpeedDivisor = 1.5;
     public static final double kDriveTurnDivisor = 2.5;
 
-    public static final float kGripperForwardLimit = 17.0f;
-    public static final float kGripperReverseLimit = -2f;
-
-    public static final double kPivotSpeed = 2.0;
-    public static final double kExtensionSpeed_IN = 1;
-    public static final double kExtensionSpeed_OUT = 3;
-    public static final double kGripperSpeed = 0.5;
+    // Drivetrain Limits
+    public static final double kMaxSpeed = 3.81;
+    public static final double kMaxAngVel = 3.615;
 
 
-    // ALL OF THESE need to be measured
     public static final double kDriveGearing = 10.71;
-    public static final double kMOI = 7.5;
-    public static final double kMass = 60.0;
 
+    public static final double kMOI = 7.5; // unmeasured, arbitrary value
+    public static final double kMass = 60.0; // ^
+
+    // Measured in SysID
     public static final double kS = 0.120;
     public static final double kV = 1.36;
     public static final double kA = 0.236;
 
     public static final double kP = 0.146;
 
-    public static final double kTrackWidth = 1;
+    public static final double kTrackWidth = .7112;
     public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(kTrackWidth);
 
+    // Ramsete settings
     public static final double kB = 2.0;
     public static final double kZeta = 0.7;
 

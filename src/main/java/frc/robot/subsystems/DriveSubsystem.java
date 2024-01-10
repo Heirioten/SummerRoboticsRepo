@@ -8,12 +8,13 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OperatorConstants;
 
 
 public class DriveSubsystem extends SubsystemBase {
@@ -43,36 +44,58 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   // Drive methods
-  public void arcadeDrive(double y, double omega)
+  public void arcadeDrive(double x, double omega)
   {
-    var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
-    tankDrive(speeds.left, speeds.right);
+    // var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
+    // tankDrive(speeds.left, speeds.right);
+    var speeds = new ChassisSpeeds(x * OperatorConstants.kMaxSpeed, 0.0, omega * OperatorConstants.kMaxAngVel);
+    driveChassisSpeeds(speeds);
   }
 
-  public void tankDrive(double left, double right) {
-    tankDriveVolts(left * RobotController.getBatteryVoltage(), right * RobotController.getBatteryVoltage());
+  public void arcadeDrive(double x, double y, double omega)
+  {
+    // var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
+    // tankDrive(speeds.left, speeds.right);
+    var speeds = new ChassisSpeeds(x * OperatorConstants.kMaxSpeed, y * OperatorConstants.kMaxSpeed, omega * OperatorConstants.kMaxAngVel);
+    driveChassisSpeeds(speeds);
   }
 
-  public void tankDriveVolts(double leftV, double rightV) {
-    io.setLeftVoltage(leftV);
-    io.setRightVoltage(rightV);
+  public void arcadeDriveFieldOriented(double x, double y, double omega)
+  {
+    var speeds = ChassisSpeeds.fromFieldRelativeSpeeds(x * OperatorConstants.kMaxSpeed, y * OperatorConstants.kMaxSpeed, omega * OperatorConstants.kMaxAngVel, new Rotation2d(Math.toRadians(getYaw())));
+    driveChassisSpeeds(speeds);
   }
 
+  public void setWheelSpeeds(double left, double right) {
+    driveChassisSpeeds(OperatorConstants.kinematics.toChassisSpeeds(new DifferentialDriveWheelSpeeds(left, right)));
+  }
 
+  public void driveChassisSpeeds(ChassisSpeeds speeds) {
+    io.setChassisSpeeds(speeds);
+  }
 
 
   // Getters / Setters
 
   public void setPose(double x, double y, double yaw) {
-    odometry.resetPosition(new Rotation2d(yaw), leftEncoderAverage(), rightEncoderAverage(), new Pose2d(x, y, new Rotation2d(yaw)));
+    setPose(new Pose2d(x, y, new Rotation2d(Math.toRadians(yaw))));
+  }
+
+  public void setPose(Pose2d pose) {
+    odometry.resetPosition(pose.getRotation(), pose.getX(), pose.getY(), pose);
+    io.setPose(pose);
+  }
+
+  public void resetPose() {
+    setPose(0, 0, 0);
   }
 
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return inputs.robotPose;
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    var speeds = new DifferentialDriveWheelSpeeds(inputs.leftVelocity, inputs.rightVelocity);
+    var speeds = new DifferentialDriveWheelSpeeds((inputs.flVelocity + inputs.brVelocity) / 2, (inputs.frVelocity + inputs.brVelocity) / 2);
 
     return speeds;
   }
@@ -89,8 +112,15 @@ public class DriveSubsystem extends SubsystemBase {
     return inputs.rightEncoderAverage;
   }
 
-  // not sure why we need this one but trajectory tutorial says we do and i havent read it all yet
-  public double getEncoderAverage() {
-    return (leftEncoderAverage() + rightEncoderAverage()) / 2;
-  }
+
+
+  // public void tankDrive(double left, double right) {
+  //   tankDriveVolts(left * RobotController.getBatteryVoltage(), right * RobotController.getBatteryVoltage());
+  // }
+
+  // public void tankDriveVolts(double leftV, double rightV) {
+  //   io.setLeftVoltage(leftV);
+  //   io.setRightVoltage(rightV);
+  // }
+
 }

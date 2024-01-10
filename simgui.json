@@ -13,7 +13,8 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/DriveChooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/TempAutoChooser": "String Chooser"
+      "/SmartDashboard/TempAutoChooser": "String Chooser",
+      "/SmartDashboard/navX-Sensor[1]": "Gyro"
     },
     "windows": {
       "/SmartDashboard/DriveChooser": {
@@ -43,5 +44,8 @@
     "Transitory Values": {
       "open": false
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

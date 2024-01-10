@@ -1,93 +1,115 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.PigeonIMU;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
+import java.io.File;
+import java.io.IOException;
 
+import com.revrobotics.CANSparkMax;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.OperatorConstants;
+import swervelib.SwerveDrive;
+import swervelib.parser.SwerveParser;
 
 
 public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
-    CANSparkMax fl, fr, bl, br;
-    RelativeEncoder encoderFl, encoderFr, encoderBl, encoderBr;
-    MotorControllerGroup left, right;
-    DifferentialDrive drive;
+    SwerveDrive swerveDrive;
 
-    PigeonIMU pigeon;
+    // CANSparkMax fl, fr, bl, br;
+    // RelativeEncoder encoderFl, encoderFr, encoderBl, encoderBr;
+    // MotorControllerGroup left, right;
+    // DifferentialDrive drive;
+
+    // PigeonIMU pigeon;
 
     public DriveSubsystemIOSparkMax() {
-        fl = new CANSparkMax(1, MotorType.kBrushless);
-        fr = new CANSparkMax(2, MotorType.kBrushless);
-        bl = new CANSparkMax(3, MotorType.kBrushless);
-        br = new CANSparkMax(4, MotorType.kBrushless);
-
-        fl.restoreFactoryDefaults();
-        fr.restoreFactoryDefaults();
-        bl.restoreFactoryDefaults();
-        br.restoreFactoryDefaults();
-
-        fl.setInverted(false);
-        fr.setInverted(true);
-        bl.setInverted(false);
-        br.setInverted(true);
-
-        encoderFl = fl.getEncoder();
-        encoderFr = fr.getEncoder();
-        encoderBl = bl.getEncoder();
-        encoderBr = br.getEncoder();
-
-        encoderFl.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-        encoderFr.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-        encoderBl.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-        encoderBr.setPositionConversionFactor(OperatorConstants.kDistancePerPulse);
-
-        encoderFl.setVelocityConversionFactor(OperatorConstants.kVelocityConversionFactor);
-        encoderFr.setVelocityConversionFactor(OperatorConstants.kVelocityConversionFactor);
-        encoderBl.setVelocityConversionFactor(OperatorConstants.kVelocityConversionFactor);
-        encoderBr.setVelocityConversionFactor(OperatorConstants.kVelocityConversionFactor);
-
-
-        left = new MotorControllerGroup(fl, bl);
-        right = new MotorControllerGroup(fr, br);
-
-        fl.setIdleMode(IdleMode.kCoast);
-        fr.setIdleMode(IdleMode.kCoast);
-        bl.setIdleMode(IdleMode.kCoast);
-        br.setIdleMode(IdleMode.kCoast);  
-
-        drive = new DifferentialDrive(left, right);
-        drive.setSafetyEnabled(false);
-
-        pigeon = new PigeonIMU(0);
+        File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
+        try {
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(3);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(swerveDrive.getSwerveController().config.maxAngularVelocity);
+        
+        for(int i = 0; i < 4; i++)
+            swerveDrive.getModules()[i].feedforward = new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV);
     }
 
     @Override
     public void updateInputs(DriveSubsystemIOInputs inputs) {
-        inputs.leftEncoderAverage = (encoderFl.getPosition() + encoderBl.getPosition()) / 2;
-        inputs.leftVelocity = (encoderFl.getVelocity() + encoderBl.getVelocity()) / 2;
-        inputs.leftAppliedVolts = ((fl.get() + bl.get()) / 2) * RobotController.getBatteryVoltage();
-        inputs.leftCurrentAmps = new double[] {fl.getOutputCurrent(), bl.getOutputCurrent()};
+        double voltage = RobotController.getBatteryVoltage();
 
-        inputs.rightEncoderAverage = (encoderFr.getPosition() + encoderBr.getPosition()) / 2;
-        inputs.rightVelocity = (encoderFr.getVelocity() + encoderBl.getVelocity()) / 2;
-        inputs.rightAppliedVolts = ((fr.get() + br.get()) / 2) * RobotController.getBatteryVoltage();
-        inputs.rightCurrentAmps = new double[] {fr.getOutputCurrent(), br.getOutputCurrent()};
+        inputs.flPosition = swerveDrive.getModules()[0].getDriveMotor().getPosition();
+        inputs.flVelocity = swerveDrive.getModules()[0].getDriveMotor().getVelocity();
+        inputs.flVolts = getMotor(0, 0).get() * voltage;
+        inputs.flAmps = getMotor(0, 0).getOutputCurrent();
 
-        inputs.gyroYaw = pigeon.getYaw();
+        inputs.frPosition = swerveDrive.getModules()[1].getDriveMotor().getPosition();
+        inputs.frVelocity = swerveDrive.getModules()[1].getDriveMotor().getVelocity();
+        inputs.frVolts = getMotor(1, 0).get() * voltage;
+        inputs.frAmps = getMotor(1, 0).getOutputCurrent();
+
+        inputs.blPosition = swerveDrive.getModules()[2].getDriveMotor().getPosition();
+        inputs.blVelocity = swerveDrive.getModules()[2].getDriveMotor().getVelocity();
+        inputs.blVolts = getMotor(2, 0).get() * voltage;
+        inputs.blAmps = getMotor(2, 0).getOutputCurrent();
+
+        inputs.brPosition = swerveDrive.getModules()[3].getDriveMotor().getPosition();
+        inputs.brVelocity = swerveDrive.getModules()[3].getDriveMotor().getVelocity();
+        inputs.brVolts = getMotor(3, 0).get() * voltage;
+        inputs.brAmps = getMotor(3, 0).getOutputCurrent();
+
+
+        inputs.flAnglePosition = swerveDrive.getModules()[0].getAngleMotor().getPosition();
+        inputs.flAngleVelocity = swerveDrive.getModules()[0].getAngleMotor().getVelocity();
+        inputs.flAngleVolts = getMotor(0, 1).get() * voltage;
+        inputs.flAngleAmps = getMotor(0, 1).getOutputCurrent();
+
+        inputs.frAnglePosition = swerveDrive.getModules()[1].getAngleMotor().getPosition();
+        inputs.frAngleVelocity = swerveDrive.getModules()[1].getAngleMotor().getVelocity();
+        inputs.frAngleVolts = getMotor(1, 1).get() * voltage;
+        inputs.frAngleAmps = getMotor(1, 1).getOutputCurrent();
+
+        inputs.blAnglePosition = swerveDrive.getModules()[2].getAngleMotor().getPosition();
+        inputs.blAngleVelocity = swerveDrive.getModules()[2].getAngleMotor().getVelocity();
+        inputs.blAngleVolts = getMotor(2, 1).get() * voltage;
+        inputs.blAngleAmps = getMotor(2, 1).getOutputCurrent();
+
+        inputs.brAnglePosition = swerveDrive.getModules()[3].getAngleMotor().getPosition();
+        inputs.brAngleVelocity = swerveDrive.getModules()[3].getAngleMotor().getVelocity();
+        inputs.brAngleVolts = getMotor(3, 1).get() * voltage;
+        inputs.brAngleAmps = getMotor(3, 1).getOutputCurrent();
+
+        inputs.leftEncoderAverage = (inputs.flPosition + inputs.blPosition) / 2;
+        inputs.rightEncoderAverage = (inputs.frPosition + inputs.brPosition) / 2;
+
+        inputs.gyroYaw = swerveDrive.getYaw().getDegrees();
+
+        inputs.robotPose = swerveDrive.getPose();
     }
 
     @Override
-    public void setLeftVoltage(double leftV) {
-        left.setVoltage(leftV);
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
+        swerveDrive.setChassisSpeeds(speeds);
     }
 
     @Override
-    public void setRightVoltage(double rightV) {
-        right.setVoltage(rightV);
+    public void setPose(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+    }
+
+    /**
+     * 
+     * @param module Module number, [0, 3]. 0 -> FL, 1 -> FR, 2 -> BL, 3 -> BR
+     * @param motor Motor number, [0, 1]. 0 -> Drive, 1 -> Angle
+     * @return The addressed motor
+     */
+    private CANSparkMax getMotor(int module, int motor) {
+        if(motor == 0) return ((CANSparkMax) swerveDrive.getModules()[module].getDriveMotor().getMotor());
+        else return ((CANSparkMax) swerveDrive.getModules()[module].getAngleMotor().getMotor());
     }
 }

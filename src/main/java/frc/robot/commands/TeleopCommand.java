@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
@@ -15,7 +16,8 @@ public class TeleopCommand extends CommandBase {
  
   DriveSubsystem driveSubsystem;
   XboxController controller;
-  SlewRateLimiter filter;
+  SlewRateLimiter filterX;
+  SlewRateLimiter filterY;
   RobotContainer container;
   
   public TeleopCommand(DriveSubsystem driveSubsystem, RobotContainer container) 
@@ -24,7 +26,8 @@ public class TeleopCommand extends CommandBase {
     this.container = container;
     controller = new XboxController(0);
     addRequirements(driveSubsystem);
-    filter = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
+    filterX = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
+    filterY = new SlewRateLimiter(OperatorConstants.kDriveRateLimit);
   }
 
   @Override
@@ -33,16 +36,24 @@ public class TeleopCommand extends CommandBase {
   @Override
   public void execute() 
   {
-    // if(container.getDriveConfig() == 0)
-      driveSubsystem.arcadeDrive(filter.calculate(-controller.getLeftY() / OperatorConstants.kDriveSpeedDivisor), (-controller.getRightX() / OperatorConstants.kDriveTurnDivisor));
-    // else if(container.getDriveConfig() == 1) {
-    //   driveSubsystem.tankDrive(controller.getLeftY(), controller.getRightY());
-    // } else {
-    //   driveSubsystem.arcadeDrive(filter.calculate(-controller.getRawAxis(1)), 
-    //   controller.getRawAxis(2));
-    // }
+    double filteredX = 0.0; // Forward/backward
+    if(!Robot.isReal()) filteredX = filterX.calculate(-controller.getRawAxis(1)); // Simulated axis
+    else filteredX = filterX.calculate(-controller.getLeftY()); // Real axis
+    if(Math.abs(filteredX) < 0.15) filteredX = 0; // Deadzone
 
-   }
+    double filteredY = 0.0;
+    if(!Robot.isReal()) filteredY = filterY.calculate(-controller.getRawAxis(0));
+    else filteredY = filterY.calculate(-controller.getLeftX());
+    if(Math.abs(filteredY) < 0.15) filteredY = 0;
+
+    double omega = 0.0; // Turning
+    if(!Robot.isReal()) omega = -controller.getRawAxis(2);
+    else omega = -controller.getRightX();
+    if(Math.abs(omega) < 0.15) omega = 0;
+   
+    driveSubsystem.arcadeDriveFieldOriented(filteredX, filteredY, omega);
+
+  }
 
   @Override
   public void end(boolean interrupted) 
