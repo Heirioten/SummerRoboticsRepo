@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.DriveSubsystemIOInputsAutoLogged;
 
 
 public class DriveSubsystem extends SubsystemBase {

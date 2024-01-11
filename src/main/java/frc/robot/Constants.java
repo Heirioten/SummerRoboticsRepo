@@ -1,5 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 
 public final class Constants 
@@ -44,5 +48,9 @@ public final class Constants
 
     public static final double kMaxAutoVel = 2.0;
     public static final double kMaxAutoAccel = 1.0;
+  }
+
+  public static class VisionConstants {
+    public static final Transform3d kTransformToRobot = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
   }
 }
