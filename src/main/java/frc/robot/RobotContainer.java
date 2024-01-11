@@ -7,9 +7,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.FollowTrajectoryCommand;
-import frc.robot.commands.SwerveTrajectoryCommand;
 import frc.robot.commands.TeleopCommand;
+import frc.robot.commands.auto.Autos;
+import frc.robot.commands.auto.FollowTrajectoryCommand;
+import frc.robot.commands.auto.SwerveTrajectoryCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.DriveSubsystemIOSparkMax;
 
@@ -50,7 +51,7 @@ public class RobotContainer
   {
     driveSubsystem = new DriveSubsystem(new DriveSubsystemIOSparkMax());
 
-        driveSubsystem.setPose(1.92, 4.46, 180);
+    Autos.constructAutoBuilder(driveSubsystem);
 
     teleopCommand = new TeleopCommand(driveSubsystem, this);
 
@@ -78,30 +79,17 @@ public class RobotContainer
 
   public Command getAutonomousCommand() 
   {
-    return getSwerveAutoCommand(
-      PathPlanner.loadPath("Blue1_2Cube_0", OperatorConstants.kMaxAutoVel, OperatorConstants.kMaxAutoAccel),
-      getSwerveAutoBuilder());
-
+    return Autos.B1R3_2Cube();
+    // return getSwerveAutoCommand(
+    //   PathPlanner.loadPath("Blue1_2Cube_0", OperatorConstants.kMaxAutoVel, OperatorConstants.kMaxAutoAccel));
   }
 
   public Command getRamseteCommand(Trajectory trajectory) {
     return new FollowTrajectoryCommand(driveSubsystem, trajectory);
   }
 
-  public Command getSwerveAutoCommand(PathPlannerTrajectory trajectory, SwerveAutoBuilder swerveAutoBuilder) {
-    return new SwerveTrajectoryCommand(driveSubsystem, trajectory, swerveAutoBuilder);
-  }
-
-  public SwerveAutoBuilder getSwerveAutoBuilder() {
-    return new SwerveAutoBuilder(
-      driveSubsystem::getPose,
-      driveSubsystem::setPose,
-      new PIDConstants(OperatorConstants.kP, 0, 0),
-      new PIDConstants(OperatorConstants.kP, 0, 0),
-      driveSubsystem::driveChassisSpeeds,
-      new HashMap<>(),
-      driveSubsystem
-    );
+  public Command getSwerveAutoCommand(PathPlannerTrajectory trajectory) {
+    return new SwerveTrajectoryCommand(driveSubsystem, trajectory);
   }
 
   public int getDriveConfig() {

@@ -43,6 +43,6 @@ public final class Constants
     public static final double kZeta = 0.7;
 
     public static final double kMaxAutoVel = 2.0;
-    public static final double kMaxAutoAccel = 0.25;
+    public static final double kMaxAutoAccel = 1.0;
   }
 }

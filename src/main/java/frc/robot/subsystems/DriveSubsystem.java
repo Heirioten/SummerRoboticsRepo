@@ -82,8 +82,9 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void setPose(Pose2d pose) {
-    odometry.resetPosition(pose.getRotation(), pose.getX(), pose.getY(), pose);
+    // odometry.resetPosition(pose.getRotation(), pose.getX(), pose.getY(), pose);
     io.setPose(pose);
+    System.out.println(pose.getX());
   }
 
   public void resetPose() {
