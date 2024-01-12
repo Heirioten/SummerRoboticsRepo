@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
@@ -100,6 +101,7 @@ public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
     @Override
     public void setPose(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
+        swerveDrive.setGyro(new Rotation3d(swerveDrive.getGyroRotation3d().getX(), swerveDrive.getGyroRotation3d().getY(), pose.getRotation().getRadians()));
     }
 
     /**
