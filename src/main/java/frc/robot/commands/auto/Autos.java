@@ -7,10 +7,10 @@ package frc.robot.commands.auto;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.Constants.OperatorConstants;
@@ -36,6 +36,22 @@ public class Autos {
             driveSubsystem::driveChassisSpeeds,
             eventMap,
             false, // Automatically transform trajectories for blue alliance to work on red alliance side
+            driveSubsystem
+        );
+
+        AutoBuilder.configureHolonomic(
+            driveSubsystem::getPose,
+            driveSubsystem::setPose,
+            driveSubsystem::getChassisSpeeds,
+            driveSubsystem::driveChassisSpeeds,
+            new HolonomicPathFollowerConfig(
+                new PIDConstants(OperatorConstants.kP, 0, 0),
+                new PIDConstants(OperatorConstants.kAngularP, 0, 0),
+                0,
+                0,
+                null
+            ),
+            (Boolean b) -> { return false; },
             driveSubsystem
         );
     }

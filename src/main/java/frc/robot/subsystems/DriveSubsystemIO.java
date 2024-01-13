@@ -65,6 +65,10 @@ public interface DriveSubsystemIO {
         
     }
 
+    public default ChassisSpeeds getChassisSpeeds() {
+        return null;
+    }
+
     public default void setPose(Pose2d pose) {
         
     }

@@ -38,6 +38,7 @@ public final class Constants
     public static final double kA = 0.236;
 
     public static final double kP = 0.146;
+    public static final double kAngularP = 0.146; // arbitrary
 
     public static final double kTrackWidth = .7112;
     public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(kTrackWidth);

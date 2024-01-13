@@ -75,6 +75,10 @@ public class DriveSubsystem extends SubsystemBase {
     io.setChassisSpeeds(speeds);
   }
 
+  public ChassisSpeeds getChassisSpeeds() {
+    return io.getChassisSpeeds();
+  }
+
 
   // Getters / Setters
 

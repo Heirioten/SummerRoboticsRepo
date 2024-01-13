@@ -98,6 +98,11 @@ public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
     }
 
     @Override
+    public ChassisSpeeds getChassisSpeeds() {
+        return swerveDrive.getFieldVelocity();
+    }
+
+    @Override
     public void setPose(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
         swerveDrive.setGyro(new Rotation3d(swerveDrive.getGyroRotation3d().getX(), swerveDrive.getGyroRotation3d().getY(), pose.getRotation().getRadians()));
