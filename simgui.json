@@ -14,6 +14,8 @@
       "/SmartDashboard/DriveChooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/TempAutoChooser": "String Chooser",
+      "/SmartDashboard/VisionSystemSim-cameraSim/Sim Field": "Field2d",
+      "/SmartDashboard/front Sim Field": "Field2d",
       "/SmartDashboard/navX-Sensor[1]": "Gyro"
     },
     "windows": {

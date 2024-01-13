@@ -51,6 +51,6 @@ public final class Constants
   }
 
   public static class VisionConstants {
-    public static final Transform3d kTransformToRobot = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+    public static final Transform3d kTransformToRobot = new Transform3d(new Translation3d(0, 0, 0.75), new Rotation3d());
   }
 }

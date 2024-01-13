@@ -12,29 +12,26 @@ import frc.robot.commands.auto.FollowTrajectoryCommand;
 import frc.robot.commands.auto.SwerveTrajectoryCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.DriveSubsystemIOSparkMax;
+import frc.robot.subsystems.vision.VisionSubsystem;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class RobotContainer
 {
   // private final CommandJoystick driverController = new CommandJoystick(OperatorConstants.kDriverControllerPort);
   private DriveSubsystem driveSubsystem;
+  private VisionSubsystem visionSubsystem;
   private TeleopCommand teleopCommand;
 
   private SendableChooser<Integer> driveChooser = new SendableChooser<Integer>();
   private SendableChooser<Integer> tempAutoChooser = new SendableChooser<Integer>();
 
-  private TrajectoryConfig trajectoryConfig;
-  private DifferentialDriveVoltageConstraint constraint;
-
 
   public RobotContainer()
   {
+    visionSubsystem = new VisionSubsystem();
     driveSubsystem = new DriveSubsystem(new DriveSubsystemIOSparkMax());
 
     Autos.constructAutoBuilder(driveSubsystem);
@@ -45,13 +42,6 @@ public class RobotContainer
 
     tempAutoChooser.setDefaultOption("Nothing", 0);
     tempAutoChooser.setDefaultOption("Test Trajectory Auto", 1);
-
-    constraint = new DifferentialDriveVoltageConstraint(
-      new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV),
-      OperatorConstants.kinematics,
-      6);
-    trajectoryConfig = new TrajectoryConfig(0.5, 0.2)
-    .setKinematics(OperatorConstants.kinematics).addConstraint(constraint);
     
 
     configureBindings();
@@ -66,8 +56,6 @@ public class RobotContainer
   public Command getAutonomousCommand() 
   {
     return Autos.B1R3_2Cube();
-    // return getSwerveAutoCommand(
-    //   PathPlanner.loadPath("Blue1_2Cube_0", OperatorConstants.kMaxAutoVel, OperatorConstants.kMaxAutoAccel));
   }
 
   public Command getRamseteCommand(Trajectory trajectory) {

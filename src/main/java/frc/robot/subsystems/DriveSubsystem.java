@@ -11,11 +11,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.DriveSubsystemIOInputsAutoLogged;
+// import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystem;
 
 
 public class DriveSubsystem extends SubsystemBase {
@@ -25,6 +26,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   Field2d field;
   DifferentialDriveOdometry odometry;
+
+  public static Pose2d pose = new Pose2d();
 
   public DriveSubsystem(DriveSubsystemIO io) 
   {
@@ -42,6 +45,17 @@ public class DriveSubsystem extends SubsystemBase {
     Logger.getInstance().recordOutput("Odometry/Pose", getPose());
     
     odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
+
+    pose = getPose();
+
+    
+    if(VisionSubsystem.hasTargets()) {
+      var visionPose = VisionSubsystem.getVisionPose();
+
+      if(visionPose.isPresent())
+        Logger.getInstance().recordOutput("Vision Pose", visionPose.get().estimatedPose.toPose2d());
+        // io.addVisionMeasurement(visionPose.get().estimatedPose.toPose2d(), Timer.getFPGATimestamp());
+    }
   }
 
   // Drive methods

@@ -4,8 +4,11 @@
 
 package frc.robot.subsystems.vision;
 
+import java.util.List;
+
 import org.littletonrobotics.junction.AutoLog;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
 
@@ -22,6 +25,18 @@ public interface VisionSubsystemIO {
 
     public default void updateInputs(VisionSubsystemIOInputs inputs) {
 
+    }
+
+    public default boolean hasTargets() {
+        return false;
+    }
+
+    public default List<PhotonTrackedTarget> getTargets() {
+        return null;
+    }
+
+    public default PhotonTrackedTarget getBestTarget() {
+        return null;
     }
 
 

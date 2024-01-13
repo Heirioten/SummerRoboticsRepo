@@ -33,10 +33,10 @@ public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(swerveDrive.getSwerveController().config.maxAngularVelocity);
-        
+
         for(int i = 0; i < 4; i++)
             swerveDrive.getModules()[i].feedforward = new SimpleMotorFeedforward(OperatorConstants.kS, OperatorConstants.kV);
+        
     }
 
     @Override
@@ -47,42 +47,50 @@ public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
         inputs.flVelocity = swerveDrive.getModules()[0].getDriveMotor().getVelocity();
         inputs.flVolts = getMotor(0, 0).get() * voltage;
         inputs.flAmps = getMotor(0, 0).getOutputCurrent();
+        inputs.flTemp = getMotor(0, 0).getMotorTemperature();
 
         inputs.frPosition = swerveDrive.getModules()[1].getDriveMotor().getPosition();
         inputs.frVelocity = swerveDrive.getModules()[1].getDriveMotor().getVelocity();
         inputs.frVolts = getMotor(1, 0).get() * voltage;
         inputs.frAmps = getMotor(1, 0).getOutputCurrent();
+        inputs.frTemp = getMotor(1, 0).getMotorTemperature();
 
         inputs.blPosition = swerveDrive.getModules()[2].getDriveMotor().getPosition();
         inputs.blVelocity = swerveDrive.getModules()[2].getDriveMotor().getVelocity();
         inputs.blVolts = getMotor(2, 0).get() * voltage;
         inputs.blAmps = getMotor(2, 0).getOutputCurrent();
+        inputs.blTemp = getMotor(2, 0).getMotorTemperature();
 
         inputs.brPosition = swerveDrive.getModules()[3].getDriveMotor().getPosition();
         inputs.brVelocity = swerveDrive.getModules()[3].getDriveMotor().getVelocity();
         inputs.brVolts = getMotor(3, 0).get() * voltage;
         inputs.brAmps = getMotor(3, 0).getOutputCurrent();
+        inputs.brTemp = getMotor(0, 0).getMotorTemperature();
 
 
         inputs.flAnglePosition = swerveDrive.getModules()[0].getAngleMotor().getPosition();
         inputs.flAngleVelocity = swerveDrive.getModules()[0].getAngleMotor().getVelocity();
         inputs.flAngleVolts = getMotor(0, 1).get() * voltage;
         inputs.flAngleAmps = getMotor(0, 1).getOutputCurrent();
+        inputs.flAngleTemp = getMotor(0, 0).getMotorTemperature();
 
         inputs.frAnglePosition = swerveDrive.getModules()[1].getAngleMotor().getPosition();
         inputs.frAngleVelocity = swerveDrive.getModules()[1].getAngleMotor().getVelocity();
         inputs.frAngleVolts = getMotor(1, 1).get() * voltage;
         inputs.frAngleAmps = getMotor(1, 1).getOutputCurrent();
+        inputs.frAngleTemp = getMotor(0, 0).getMotorTemperature();
 
         inputs.blAnglePosition = swerveDrive.getModules()[2].getAngleMotor().getPosition();
         inputs.blAngleVelocity = swerveDrive.getModules()[2].getAngleMotor().getVelocity();
         inputs.blAngleVolts = getMotor(2, 1).get() * voltage;
         inputs.blAngleAmps = getMotor(2, 1).getOutputCurrent();
+        inputs.blAngleTemp = getMotor(0, 0).getMotorTemperature();
 
         inputs.brAnglePosition = swerveDrive.getModules()[3].getAngleMotor().getPosition();
         inputs.brAngleVelocity = swerveDrive.getModules()[3].getAngleMotor().getVelocity();
         inputs.brAngleVolts = getMotor(3, 1).get() * voltage;
         inputs.brAngleAmps = getMotor(3, 1).getOutputCurrent();
+        inputs.brAngleTemp = getMotor(0, 0).getMotorTemperature();
 
         inputs.leftEncoderAverage = (inputs.flPosition + inputs.blPosition) / 2;
         inputs.rightEncoderAverage = (inputs.frPosition + inputs.brPosition) / 2;
@@ -101,6 +109,16 @@ public class DriveSubsystemIOSparkMax implements DriveSubsystemIO {
     public void setPose(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
         swerveDrive.setGyro(new Rotation3d(swerveDrive.getGyroRotation3d().getX(), swerveDrive.getGyroRotation3d().getY(), pose.getRotation().getRadians()));
+    }
+
+    @Override
+    public void addVisionMeasurement(Pose2d pose, double timestamp) {
+        swerveDrive.addVisionMeasurement(pose, timestamp);
+        setGyroRad(pose.getRotation().getRadians());
+    }
+
+    public void setGyroRad(double yaw) {
+        swerveDrive.setGyro(new Rotation3d(swerveDrive.getGyroRotation3d().getX(), swerveDrive.getGyroRotation3d().getY(), yaw));
     }
 
     /**
