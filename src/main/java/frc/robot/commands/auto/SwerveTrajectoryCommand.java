@@ -12,7 +12,7 @@ public class SwerveTrajectoryCommand extends SequentialCommandGroup {
   DriveSubsystem driveSubsystem;
 
   public SwerveTrajectoryCommand(DriveSubsystem driveSubsystem, PathPlannerPath path) {
-    // driveSubsystem.driveChassisSpeeds(new ChassisSpeeds(0, 0, 0));
+    driveSubsystem.driveChassisSpeeds(new ChassisSpeeds(0, 0, 0));
 
     addCommands(AutoBuilder.buildAuto("auto0"));
 
