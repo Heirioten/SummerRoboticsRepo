@@ -7,8 +7,5 @@ package frc.robot.subsystems.vision;
 /** Add your docs here. */
 public class VisionSubsystemIOPhoton {
 
-    
-    public VisionSubsystemIOPhoton() {
-
-    }
+  public VisionSubsystemIOPhoton() {}
 }

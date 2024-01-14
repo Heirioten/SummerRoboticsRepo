@@ -4,39 +4,34 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
-public class Robot extends LoggedRobot 
-{
+public class Robot extends LoggedRobot {
   private Command autonomousCommand;
 
   private RobotContainer robotContainer;
 
   @Override
-  public void robotInit() 
-  {
-    if(Robot.isReal()) {
-      Logger.getInstance().addDataReceiver(new WPILOGWriter("/media/sda2"));
-      Logger.getInstance().addDataReceiver(new NT4Publisher());
+  public void robotInit() {
+    if (Robot.isReal()) {
+      Logger.addDataReceiver(new WPILOGWriter("/media/sda2"));
+      Logger.addDataReceiver(new NT4Publisher());
     } else {
-      Logger.getInstance().addDataReceiver(new NT4Publisher());
+      Logger.addDataReceiver(new NT4Publisher());
     }
 
-    Logger.getInstance().start();
-
+    Logger.start();
 
     robotContainer = new RobotContainer();
   }
 
   @Override
-  public void robotPeriodic() 
-  {
+  public void robotPeriodic() {
     CommandScheduler.getInstance().run();
   }
 
@@ -50,8 +45,7 @@ public class Robot extends LoggedRobot
   public void disabledExit() {}
 
   @Override
-  public void autonomousInit() 
-  {
+  public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     if (autonomousCommand != null) {
@@ -66,8 +60,7 @@ public class Robot extends LoggedRobot
   public void autonomousExit() {}
 
   @Override
-  public void teleopInit() 
-  {
+  public void teleopInit() {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
@@ -80,8 +73,7 @@ public class Robot extends LoggedRobot
   public void teleopExit() {}
 
   @Override
-  public void testInit() 
-  {
+  public void testInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 

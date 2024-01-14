@@ -4,30 +4,25 @@
 
 package frc.robot.subsystems;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.DriveSubsystemIOInputsAutoLogged;
-
+import org.littletonrobotics.junction.Logger;
 
 public class DriveSubsystem extends SubsystemBase {
-  
+
   private final DriveSubsystemIO io;
   DriveSubsystemIOInputsAutoLogged inputs = new DriveSubsystemIOInputsAutoLogged();
 
   Field2d field;
   DifferentialDriveOdometry odometry;
 
-  public DriveSubsystem(DriveSubsystemIO io) 
-  {
+  public DriveSubsystem(DriveSubsystemIO io) {
     this.io = io;
     odometry = new DifferentialDriveOdometry(new Rotation2d(0), 0, 0);
 
@@ -37,38 +32,49 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.getInstance().processInputs("DriveSubsystem", inputs);
+    Logger.processInputs("DriveSubsystem", inputs);
 
-    Logger.getInstance().recordOutput("Odometry/Pose", getPose());
-    
-    odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(), rightEncoderAverage());
+    Logger.recordOutput("Odometry/Pose", getPose());
+
+    odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(),
+    rightEncoderAverage());
   }
 
   // Drive methods
-  public void arcadeDrive(double x, double omega)
-  {
+  public void arcadeDrive(double x, double omega) {
     // var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
     // tankDrive(speeds.left, speeds.right);
-    var speeds = new ChassisSpeeds(x * OperatorConstants.kMaxSpeed, 0.0, omega * OperatorConstants.kMaxAngVel);
+    var speeds =
+        new ChassisSpeeds(
+            x * OperatorConstants.kMaxSpeed, 0.0, omega * OperatorConstants.kMaxAngVel);
     driveChassisSpeeds(speeds);
   }
 
-  public void arcadeDrive(double x, double y, double omega)
-  {
+  public void arcadeDrive(double x, double y, double omega) {
     // var speeds = DifferentialDrive.arcadeDriveIK(y, omega, true);
     // tankDrive(speeds.left, speeds.right);
-    var speeds = new ChassisSpeeds(x * OperatorConstants.kMaxSpeed, y * OperatorConstants.kMaxSpeed, omega * OperatorConstants.kMaxAngVel);
+    var speeds =
+        new ChassisSpeeds(
+            x * OperatorConstants.kMaxSpeed,
+            y * OperatorConstants.kMaxSpeed,
+            omega * OperatorConstants.kMaxAngVel);
     driveChassisSpeeds(speeds);
   }
 
-  public void arcadeDriveFieldOriented(double x, double y, double omega)
-  {
-    var speeds = ChassisSpeeds.fromFieldRelativeSpeeds(x * OperatorConstants.kMaxSpeed, y * OperatorConstants.kMaxSpeed, omega * OperatorConstants.kMaxAngVel, new Rotation2d(Math.toRadians(getYaw())));
+  public void arcadeDriveFieldOriented(double x, double y, double omega) {
+    var speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            x * OperatorConstants.kMaxSpeed,
+            y * OperatorConstants.kMaxSpeed,
+            omega * OperatorConstants.kMaxAngVel,
+            new Rotation2d(Math.toRadians(getYaw())));
     driveChassisSpeeds(speeds);
   }
 
   public void setWheelSpeeds(double left, double right) {
-    driveChassisSpeeds(OperatorConstants.kinematics.toChassisSpeeds(new DifferentialDriveWheelSpeeds(left, right)));
+    driveChassisSpeeds(
+        OperatorConstants.kinematics.toChassisSpeeds(
+            new DifferentialDriveWheelSpeeds(left, right)));
   }
 
   public void driveChassisSpeeds(ChassisSpeeds speeds) {
@@ -78,7 +84,6 @@ public class DriveSubsystem extends SubsystemBase {
   public ChassisSpeeds getChassisSpeeds() {
     return io.getChassisSpeeds();
   }
-
 
   // Getters / Setters
 
@@ -101,7 +106,10 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-    var speeds = new DifferentialDriveWheelSpeeds((inputs.flVelocity + inputs.brVelocity) / 2, (inputs.frVelocity + inputs.brVelocity) / 2);
+    var speeds =
+        new DifferentialDriveWheelSpeeds(
+            (inputs.flVelocity + inputs.brVelocity) / 2,
+            (inputs.frVelocity + inputs.brVelocity) / 2);
 
     return speeds;
   }
@@ -118,10 +126,9 @@ public class DriveSubsystem extends SubsystemBase {
     return inputs.rightEncoderAverage;
   }
 
-
-
   // public void tankDrive(double left, double right) {
-  //   tankDriveVolts(left * RobotController.getBatteryVoltage(), right * RobotController.getBatteryVoltage());
+  //   tankDriveVolts(left * RobotController.getBatteryVoltage(), right *
+  // RobotController.getBatteryVoltage());
   // }
 
   // public void tankDriveVolts(double leftV, double rightV) {

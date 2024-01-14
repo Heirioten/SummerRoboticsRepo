@@ -1,23 +1,21 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
-public final class Constants 
-{
-  public static class OperatorConstants 
-  {
+public final class Constants {
+  public static class OperatorConstants {
     // Encoder Conversions
     public static final double kDistancePerPulse = (.1524 * Math.PI) / 10.71;
-    public static final double kVelocityConversionFactor = 0.0865911847/60.0;
+    public static final double kVelocityConversionFactor = 0.0865911847 / 60.0;
 
     // User controller settings
     public static final int kDriverControllerPort = 0;
     public static final double kDeadzone = 0.05;
-    
+
     public static final double kDriveRateLimit = 2.0;
     public static final double kDriveSpeedDivisor = 1.5;
     public static final double kDriveTurnDivisor = 2.5;
@@ -26,6 +24,7 @@ public final class Constants
     public static final double kMaxSpeed = 3.81;
     public static final double kMaxAngVel = 3.615;
 
+    public static final double kDriveBaseRadius = Units.inchesToMeters(11.75);
 
     public static final double kDriveGearing = 10.71;
 
@@ -41,7 +40,8 @@ public final class Constants
     public static final double kAngularP = 0.146; // arbitrary
 
     public static final double kTrackWidth = .7112;
-    public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(kTrackWidth);
+    public static final DifferentialDriveKinematics kinematics =
+        new DifferentialDriveKinematics(kTrackWidth);
 
     // Ramsete settings
     public static final double kB = 2.0;
@@ -52,6 +52,7 @@ public final class Constants
   }
 
   public static class VisionConstants {
-    public static final Transform3d kTransformToRobot = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+    public static final Transform3d kTransformToRobot =
+        new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
   }
 }

@@ -4,69 +4,42 @@
 
 package frc.robot.commands.auto;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
-
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
 /** Add your docs here. */
 public class Autos {
 
-    private static SwerveAutoBuilder autoBuilder;
-    private static HashMap<String, Command> eventMap;
-    private static DriveSubsystem driveSubsystem;
-    
-    public static void constructAutoBuilder(DriveSubsystem _driveSubsystem) {
-        driveSubsystem = _driveSubsystem;
+  private static DriveSubsystem driveSubsystem;
 
-        builtEventMap();
+  public static void constructAutoBuilder(DriveSubsystem _driveSubsystem) {
+    driveSubsystem = _driveSubsystem;
 
-        autoBuilder = new SwerveAutoBuilder(
-            driveSubsystem::getPose,
-            driveSubsystem::setPose,
+    AutoBuilder.configureHolonomic(
+        driveSubsystem::getPose,
+        driveSubsystem::setPose,
+        driveSubsystem::getChassisSpeeds,
+        driveSubsystem::driveChassisSpeeds,
+        new HolonomicPathFollowerConfig(
             new PIDConstants(OperatorConstants.kP, 0, 0),
-            new PIDConstants(OperatorConstants.kP, 0, 0),
-            driveSubsystem::driveChassisSpeeds,
-            eventMap,
-            false, // Automatically transform trajectories for blue alliance to work on red alliance side
-            driveSubsystem
-        );
+            new PIDConstants(OperatorConstants.kAngularP, 0, 0),
+            OperatorConstants.kMaxSpeed,
+            OperatorConstants.kDriveBaseRadius,
+            new ReplanningConfig()),
+        Autos::getFlip,
+        driveSubsystem);
+  }
 
-        AutoBuilder.configureHolonomic(
-            driveSubsystem::getPose,
-            driveSubsystem::setPose,
-            driveSubsystem::getChassisSpeeds,
-            driveSubsystem::driveChassisSpeeds,
-            new HolonomicPathFollowerConfig(
-                new PIDConstants(OperatorConstants.kP, 0, 0),
-                new PIDConstants(OperatorConstants.kAngularP, 0, 0),
-                0,
-                0,
-                null
-            ),
-            (Boolean b) -> { return false; },
-            driveSubsystem
-        );
-    }
+  public static Command B1R3_2Cube() {
+    return new B1R3_2Cube(driveSubsystem);
+  }
 
-    public static void builtEventMap() {
-        eventMap =  new HashMap<>(
-            Map.ofEntries(
-                Map.entry("deployArm", new PrintCommand("deployArm")),
-                Map.entry("grab", new PrintCommand("grab")),
-                Map.entry("release", new PrintCommand("release"))
-            )
-        );
-    }
-
-    public static Command B1R3_2Cube() {
-        return new B1R3_2Cube(driveSubsystem, autoBuilder);
-    }
+  public static boolean getFlip() {
+    return false;
+  }
 }
