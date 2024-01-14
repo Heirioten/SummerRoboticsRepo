@@ -24,7 +24,7 @@ public final class Constants {
     public static final double kMaxSpeed = 3.81;
     public static final double kMaxAngVel = 3.615;
 
-    public static final double kDriveBaseRadius = Units.inchesToMeters(11.75);
+    public static final double kDriveBaseRadius = Units.inchesToMeters(Math.sqrt(Math.pow(11.75, 2.0) + Math.pow(10.75, 2.0)));
 
     public static final double kDriveGearing = 10.71;
 
