@@ -5,12 +5,20 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.subsystems.DriveSubsystem;
+
 import java.util.List;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -19,6 +27,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 public class VisionSubsystem extends SubsystemBase {
 
   PhotonCamera camera;
+  PhotonCameraSim cameraSim;
   PhotonPoseEstimator poseEstimator;
   PhotonPipelineResult result;
   List<PhotonTrackedTarget> targets;
@@ -27,7 +36,14 @@ public class VisionSubsystem extends SubsystemBase {
   VisionSystemSim sim;
 
   public VisionSubsystem() {
-    camera = new PhotonCamera("front");
+    camera = new PhotonCamera("camera");
+    SimCameraProperties properties = new SimCameraProperties();
+    // properties.setCalibration(640, 480, Rotation2d.fromDegrees(70));
+    cameraSim = new PhotonCameraSim(camera, properties);
+    if(Robot.isSimulation()) cameraSim.enableDrawWireframe(true);
+
+    sim = new VisionSystemSim("main");
+    sim.addCamera(cameraSim, new Transform3d(0, 0, 0, new Rotation3d()));
     try {
       poseEstimator =
           new PhotonPoseEstimator(
@@ -35,6 +51,8 @@ public class VisionSubsystem extends SubsystemBase {
               PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
               camera,
               VisionConstants.kTransformToRobot);
+
+      sim.addAprilTags(AprilTagFields.k2024Crescendo.loadAprilTagLayoutField());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -46,6 +64,12 @@ public class VisionSubsystem extends SubsystemBase {
 
     targets = result.getTargets();
     bestTarget = result.getBestTarget();
+
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    sim.update(DriveSubsystem.robotPose);
   }
 
   public List<PhotonTrackedTarget> getTargets() {

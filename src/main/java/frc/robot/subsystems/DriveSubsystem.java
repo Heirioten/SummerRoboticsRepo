@@ -22,6 +22,8 @@ public class DriveSubsystem extends SubsystemBase {
   Field2d field;
   DifferentialDriveOdometry odometry;
 
+  public static Pose2d robotPose = new Pose2d();
+
   public DriveSubsystem(DriveSubsystemIO io) {
     this.io = io;
     odometry = new DifferentialDriveOdometry(new Rotation2d(0), 0, 0);
@@ -39,6 +41,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     odometry.update(Rotation2d.fromDegrees(getYaw()), leftEncoderAverage(),
     rightEncoderAverage());
+
+    robotPose = getPose();
   }
 
   // Drive methods

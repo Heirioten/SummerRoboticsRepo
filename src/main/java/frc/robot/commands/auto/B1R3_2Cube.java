@@ -1,6 +1,5 @@
 package frc.robot.commands.auto;
 
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.DriveSubsystem;
@@ -12,7 +11,7 @@ public class B1R3_2Cube extends SwerveTrajectoryCommand {
     super(driveSubsystem, getAutonomousTrajectory());
   }
 
-  public static PathPlannerPath getAutonomousTrajectory() {
+  public static String getAutonomousTrajectory() {
     var allianceOptional = DriverStation.getAlliance();
     Alliance alliance = null;
     if (allianceOptional.isPresent()) {
@@ -22,7 +21,7 @@ public class B1R3_2Cube extends SwerveTrajectoryCommand {
     }
 
     if (alliance == Alliance.Blue) {
-      return PathPlannerPath.fromPathFile("path0");
-    } else return PathPlannerPath.fromPathFile("path0");
+      return "auto0";
+    } else return "auto0";
   }
 }
